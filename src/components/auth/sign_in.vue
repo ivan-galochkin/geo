@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid w-50 mx-auto my-5 border rounded">
+  <div class="container-fluid w-50 mx-auto my-5 border-dark rounded" style="height: min-content; background: #212529; color:white">
     <form class>
       <div class="mt-2">
         <h3>Sign in</h3>
@@ -14,11 +14,13 @@
         <input type="password" v-model="password" class="form-control form-control-lg"/>
       </div>
       <div class="mt-2">
-        <button type="submit" class="btn btn-dark btn-lg btn-block" v-on:click="login">Sign in</button>
+        <button class="btn btn-success btn-lg btn-block" @click.prevent="sign_in">Sign in</button>
       </div>
       <p class="forgot-password text-right mt-2 mb-4">
-        <router-link to="/forgot-password">Forgot password ?</router-link>
+        Don't have an account?
+        <router-link to="/sign_up"><a class="ml-2">Sign Up</a></router-link>
       </p>
+
 
     </form>
   </div>
@@ -26,7 +28,8 @@
 
 <script>
 import axios from "axios";
-import App from "@/App";
+import {store} from "@/main";
+import {router} from "@/router";
 
 export default {
   name: "sign_in",
@@ -37,16 +40,13 @@ export default {
     }
   },
   methods: {
-    login() {
-      axios.get(App.data.db_url + `/users/email?=${this.email}&password?=${this.password}`).then(
-          (response) => {
-            localStorage.token = response.data.token;
-          }
-      ).catch(
-          (error) => {
-            console.log(error);
-          }
-      )
+    async sign_in() {
+      const data = {email: this.email, password: this.password}
+      await axios.post('http://127.0.0.1:8000/users/sign_in', data).then(function (response) {
+        store.commit("setTokens", response.data);
+        store.commit("setUser", response.data);
+        router.push("/catalog")
+      })
     }
   }
 
